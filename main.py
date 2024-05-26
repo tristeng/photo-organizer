@@ -3,6 +3,7 @@ import csv
 import logging
 import pathlib
 import re
+import shutil
 
 
 # keys we want to access in the csv file
@@ -47,6 +48,9 @@ def main():
 
     # add an optional boolean argument to performa dryrun that defaults to False
     parser.add_argument("--dryrun", help="Perform a dry run", action="store_true")
+
+    # add an optional boolean argument to copy files instead of moving them that defaults to False
+    parser.add_argument("--copy", help="Copy photos instead of moving them", action="store_true")
 
     # parse the arguments
     args = parser.parse_args()
@@ -95,8 +99,12 @@ def main():
             # move the photo to the student directory
             if not args.dryrun:
                 if student_dir:
-                    photo.rename(student_dir / photo.name)
-                    logging.info(f"Moved photo: {photo} to {student_dir}")
+                    if args.copy:
+                        shutil.copy(photo, student_dir / photo.name)
+                        logging.info(f"Copied photo: {photo} to {student_dir}")
+                    else:
+                        photo.rename(student_dir / photo.name)
+                        logging.info(f"Moved photo: {photo} to {student_dir}")
                 else:
                     logging.warning(f"Photo not moved - no student directory found: {photo}")
             else:
